@@ -13,12 +13,11 @@ public class Main extends Application {
         double height = 500;
 
         GameCanvas gameCanvas = new GameCanvas(width, height);
-        gameCanvas.draw();
 
         Group root = new Group(gameCanvas);
         Scene scene = new Scene(root);
 
-        primaryStage.setTitle("SwietnaGra");
+        primaryStage.setTitle("PressRMB");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
