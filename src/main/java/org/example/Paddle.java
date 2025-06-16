@@ -14,7 +14,7 @@ public class Paddle extends GraphicsItem{
     }
     @Override
     public void draw(GraphicsContext graphicsC) {
-        graphicsC.setFill(Color.GREEN);
+        graphicsC.setFill(Color.BLUE);
         double px=(x-width/2)* canvasW;
         double py=(y-height/2)*canvasH;
         double pW=width*canvasW;

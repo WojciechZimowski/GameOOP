@@ -1,15 +1,11 @@
 package org.example;
 
-import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-
 import javafx.scene.input.MouseEvent;
-
-import java.io.PipedOutputStream;
+import javafx.scene.paint.Color;
 
 public class GameCanvas extends Canvas {
     private GraphicsContext graphicsC;
@@ -18,9 +14,9 @@ public class GameCanvas extends Canvas {
     private boolean isPlaying;
     private AnimationTimer timer;
 
-    private long lastFrameTime=0;
+    private long lastFrameTime = 0;
 
-    public GameCanvas(double width, double height){
+    public GameCanvas(double width, double height) {
         super(width, height);
         graphicsC = this.getGraphicsContext2D();
 
@@ -28,11 +24,11 @@ public class GameCanvas extends Canvas {
         GraphicsItem.setCanvasH(height);
 
         paddle = new Paddle();
-        ball=new Ball();
-        isPlaying =false;
+        ball = new Ball();
+        isPlaying = false;
 
         this.setOnMouseMoved(this::mouseMovementHandler);
-        this.setOnMouseClicked(e->isPlaying = true);
+        this.setOnMouseClicked(e -> isPlaying = true);
 
         timer = new AnimationTimer() {
             @Override
@@ -42,7 +38,7 @@ public class GameCanvas extends Canvas {
                     return;
                 }
 
-                double deltaTime = (now - lastFrameTime) / 1_000_000_000.0; // nanosekundy -> sekundy
+                double deltaTime = (now - lastFrameTime) / 1_000_000_000.0; // ns -> s
                 lastFrameTime = now;
 
                 draw(deltaTime);
@@ -50,43 +46,51 @@ public class GameCanvas extends Canvas {
         };
         timer.start();
     }
-    private void mouseMovementHandler(MouseEvent e){
+
+    private void mouseMovementHandler(MouseEvent e) {
         paddle.centerPlatformX(e.getX());
     }
 
-
-    public void draw(double deltaTime){
+    public void draw(double deltaTime) {
         graphicsC.setFill(Color.BLACK);
         graphicsC.fillRect(0, 0, getWidth(), getHeight());
+
         if (isPlaying) {
             ball.updatePosition(deltaTime);
 
             if (shouldBallBounceHorizontally()) {
                 ball.bounceHorizontally();
+                if (ball.getX() < 0) ball.setX(0);
+                if (ball.getX() > 1 - ball.getWidth()) ball.setX(1 - ball.getWidth());
             }
+
             if (shouldBallBounceVertically()) {
                 ball.bounceVertically();
+                if (ball.getY() < 0) ball.setY(0);
             }
+
             if (shouldBallBounceFromPaddle()) {
-                ball.bounceHorizontally();  // zgodnie z poleceniem traktujemy odbicie od platformy jako poziome
+                ball.bounceVertically();
+                ball.setY(paddle.getY() - paddle.getHeight() / 2 - ball.getHeight());
             }
         } else {
-            double ballX = paddle.getX() * GraphicsItem.canvasW + (paddle.getWidth() * GraphicsItem.canvasW) / 2;
-            double ballY = paddle.getY() * GraphicsItem.canvasH - 20;
+            double ballX = paddle.getX() * GraphicsItem.canvasW + (paddle.getWidth() * GraphicsItem.canvasW) / 2-40;
+            double ballY = paddle.getY() * GraphicsItem.canvasH - 40;
             ball.setPosition(new Point2D(ballX, ballY));
         }
 
         paddle.draw(graphicsC);
         ball.draw(graphicsC);
+    }
 
-
-        }
     private boolean shouldBallBounceHorizontally() {
-        return (ball.getX()<=0) || (ball.getX()>=1-ball.getWidth());
+        return (ball.getX() <= 0) || (ball.getX() >= 1 - ball.getWidth());
     }
+
     private boolean shouldBallBounceVertically() {
-        return ball.getY()<=0;
+        return ball.getY() <= 0;
     }
+
     private boolean shouldBallBounceFromPaddle() {
         boolean verticalCollision = ball.getY() + ball.getHeight() >= paddle.getY() - paddle.getHeight() / 2;
         boolean horizontalCollision = (
@@ -94,6 +98,4 @@ public class GameCanvas extends Canvas {
                 (ball.getX() <= paddle.getX() + paddle.getWidth() / 2);
         return verticalCollision && horizontalCollision;
     }
-    }
-
-
+}
